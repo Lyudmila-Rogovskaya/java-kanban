@@ -59,4 +59,7 @@ public class Task {
         return Objects.hash(id);
     }
 
+    public void sayHello(){
+    }
+
 }
