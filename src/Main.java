@@ -1,3 +1,8 @@
+import manager.TaskManager;
+import model.Task;
+import model.Epic;
+import model.Subtask;
+import model.Status;
 import java.util.ArrayList;
 
 public class Main {
@@ -58,4 +63,3 @@ public class Main {
     }
 
 }
-// для проверки пуша (после настройки репо)

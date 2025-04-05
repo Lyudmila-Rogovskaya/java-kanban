@@ -1,3 +1,4 @@
+package model;
 import java.util.Objects;
 
 public class Task {
@@ -57,9 +58,6 @@ public class Task {
     @Override
     public int hashCode() {
         return Objects.hash(id);
-    }
-
-    public void sayHello(){
     }
 
 }
