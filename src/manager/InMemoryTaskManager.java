@@ -22,7 +22,6 @@ public class InMemoryTaskManager implements TaskManager {
         Task newTask = new Task(task.getName(), task.getDescription(), task.getStatus());
         newTask.setId(nextId++);
         tasks.put(newTask.getId(), newTask);
-        historyManager.add(newTask);
     }
 
     @Override
@@ -40,9 +39,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public Task getTaskById(int id) { // получить задачу по id
         Task task = tasks.get(id);
-        if (task != null) {
-            historyManager.add(task);
-        }
+        historyManager.add(task);
         return task;
     }
 
@@ -61,7 +58,6 @@ public class InMemoryTaskManager implements TaskManager {
     public void createEpic(Epic epic) { // создать эпик
         epic.setId(nextId++);
         epics.put(epic.getId(), epic);
-        historyManager.add(epic);
     }
 
     @Override
@@ -82,9 +78,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public Epic getEpicById(int id) { // получить эпик по id
         Epic epic = epics.get(id);
-        if (epic != null) {
-            historyManager.add(epic);
-        }
+        historyManager.add(epic);
         return epic;
     }
 
@@ -118,7 +112,6 @@ public class InMemoryTaskManager implements TaskManager {
         subtasks.put(subtask.getId(), subtask);
         epic.addSubtaskId(subtask.getId());
         updateEpicStatus(epic);
-        historyManager.add(subtask);
     }
 
     @Override
@@ -137,9 +130,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public Subtask getSubtaskById(int id) { // получить подзадачу по id
         Subtask subtask = subtasks.get(id);
-        if (subtask != null) {
-            historyManager.add(subtask);
-        }
+        historyManager.add(subtask);
         return subtask;
     }
 
