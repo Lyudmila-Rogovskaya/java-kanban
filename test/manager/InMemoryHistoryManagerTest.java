@@ -38,23 +38,39 @@ class InMemoryHistoryManagerTest {
         historyManager.add(task);
         historyManager.add(task);
         ArrayList<Task> history = historyManager.getHistory();
-        assertEquals(2, history.size(), "В истории должно быть 2 записи");
-        assertEquals(task, history.get(0), "Первая задача не совпадает");
-        assertEquals(task, history.get(1), "Вторая задача не совпадает");
+        assertEquals(1, history.size(), "В истории должна быть 1 запись");
+        assertEquals(task, history.get(0), "Задача в истории не совпадает с исходной");
     }
 
     @Test
-    void maxElementsHistory10Test() { // вместимость истории не больше 10 элементов
-        for (int i = 1; i <= 11; i++) {
-            Task task = new Task("Задача" + i, "Описание задачи", Status.NEW);
-            task.setId(i);
-            historyManager.add(task);
-        }
+    void historyOrderAndRemoveTest() { // порядок и удаление задач
+        Task task1 = new Task("Задача1", "Описание задачи1", Status.NEW);
+        task1.setId(1);
+        Task task2 = new Task("Задача2", "Описание задачи2", Status.NEW);
+        task2.setId(2);
+        Task task3 = new Task("Задача3", "Описание задачи3", Status.NEW);
+        task3.setId(3);
 
-        List<Task> history = historyManager.getHistory();
-        assertEquals(10, history.size(), "История содержит 10 элементов");
-        assertEquals(2, history.get(0).getId(), "Первый элемент истории неверный");
-        assertEquals(11, history.get(9).getId(), "Последний элемент истории неверный");
+        historyManager.add(task1);
+        historyManager.add(task2);
+        historyManager.add(task3);
+        assertEquals(List.of(task1, task2, task3), historyManager.getHistory(), "История сохраняет порядок" +
+                "добавления задач");
+
+        historyManager.add(task2);
+        assertEquals(List.of(task1, task3, task2), historyManager.getHistory(), "При повторном добавлении " +
+                "задача должна перемещаться в конец истории");
+
+        historyManager.remove(1);
+        assertEquals(List.of(task3, task2), historyManager.getHistory(), "После удаления задачи из начала " +
+                "истории порядок корректируется");
+
+        historyManager.remove(3);
+        assertEquals(List.of(task2), historyManager.getHistory(), "После удаления задачи из средины истории " +
+                "остается нужная задача");
+
+        historyManager.remove(2);
+        assertTrue(historyManager.getHistory().isEmpty(), "После удаления последней задачи история пустая");
     }
 
 }
