@@ -10,6 +10,12 @@ public class Epic extends Task {
         super(name, description, Status.NEW);
     }
 
+    public Epic(Epic other) {
+        super(other);
+        this.subtaskIds.addAll(other.subtaskIds);
+        this.setId(other.getId());
+    }
+
     public ArrayList<Integer> getSubtaskIds() { // получить подзадачу
         return subtaskIds;
     }
