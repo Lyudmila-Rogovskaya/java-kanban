@@ -27,24 +27,36 @@ public class InMemoryHistoryManager implements HistoryManager {
     public void add(Task task) { // добавление истории
         if (task == null) return;
         remove(task.getId());
-
-        Node newNode = new Node(task);
-        linkLast(newNode);
-        historyMap.put(task.getId(), newNode);
-
-        if (historyMap.size() > MAX_HISTORY_SIZE) {
-            remove(head.task.getId());
-        }
+        linkLast(task);
     }
 
-    private void linkLast(Node node) { // добавление задачи в конец списка
-        if (head == null) {
-            head = node;
-        } else {
-            tail.next = node;
-            node.prev = tail;
+    @Override
+    public ArrayList<Task> getHistory() {
+        ArrayList<Task> result = new ArrayList<>();
+        Node current = head;
+        while (current != null) {
+            result.add(current.task);
+            current = current.next;
         }
-        tail = node;
+        return result;
+    }
+
+    @Override
+    public void remove(int id) {
+        Node node = historyMap.remove(id);
+        removeNode(node);
+    }
+
+    private void linkLast(Task task) { // добавление задачи в конец списка
+        Node newNode = new Node(task);
+        if (head == null) {
+            head = newNode;
+        } else {
+            tail.next = newNode;
+            newNode.prev = tail;
+        }
+        tail = newNode;
+        historyMap.put(task.getId(), newNode);
     }
 
     private void removeNode(Node node) { // сбор всех задач из списка
@@ -66,23 +78,6 @@ public class InMemoryHistoryManager implements HistoryManager {
 
         node.prev = null;
         node.next = null;
-    }
-
-    @Override
-    public ArrayList<Task> getHistory() {
-        ArrayList<Task> result = new ArrayList<>();
-        Node current = head;
-        while (current != null) {
-            result.add(current.task);
-            current = current.next;
-        }
-        return result;
-    }
-
-    @Override
-    public void remove(int id) {
-        Node node = historyMap.remove(id);
-        removeNode(node);
     }
 
 }
