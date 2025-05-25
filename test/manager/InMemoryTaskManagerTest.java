@@ -8,6 +8,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -70,19 +71,14 @@ class InMemoryTaskManagerTest {
     void addToHistoryTest() { // добавление в историю
         Task task = new Task("Задача", "Описание задачи", Status.NEW);
         taskManager.createTask(task);
-        Task savedTask = taskManager.getAllTasks().get(0);
+        int taskId = taskManager.getAllTasks().get(0).getId();
+        taskManager.getTaskById(taskId);
 
-        Epic epic = new Epic("Эпик", "Описание эпика");
-        taskManager.createEpic(epic);
-        Epic savedEpic = taskManager.getAllEpics().get(0);
-
-        taskManager.getTaskById(savedTask.getId());
-        taskManager.getEpicById(savedEpic.getId());
         ArrayList<Task> history = taskManager.getHistory();
 
-        assertEquals(2, history.size(), "В истории должно быть 2 записи");
-        assertTrue(history.contains(savedTask), "Задача должна быть в истории");
-        assertTrue(history.contains(savedEpic), "Эпик должен быть в истории");
+        assertFalse(history.isEmpty(), "История не пустая");
+        assertEquals(taskId, history.get(0).getId(), "ID задачи в истории совпадает");
+
     }
 
     @Test
@@ -108,25 +104,25 @@ class InMemoryTaskManagerTest {
     }
 
     @Test
-    void addedTaskRetainPreviousVersionAndDataTest() { // добавленная задача сохраняет предыдущую версию и данные
+    void addedTaskRetainPreviousVersionAndDataTest() { // удаляются предыдущие записи при добавлении дубликатов
         Task originalTask = new Task("Задача", "Описание задачи", Status.NEW);
         taskManager.createTask(originalTask);
+        int taskId = taskManager.getAllTasks().get(0).getId();
+        taskManager.getTaskById(taskId);
 
-        Task savedTask = taskManager.getAllTasks().get(0);
-        int taskId = savedTask.getId();
-
-        Task taskFromManager = taskManager.getTaskById(taskId);
         Task updatedTask = new Task("Обновленная задача", "Обновленное описание", Status.DONE);
         updatedTask.setId(taskId);
         taskManager.updateTask(updatedTask);
+        taskManager.getTaskById(taskId);
 
         Task currentTask = taskManager.getTaskById(taskId);
-        assertEquals("Обновленная задача", currentTask.getName(), "Сохраняется имя обновленной задачи");
-        Task historiTask = taskManager.getHistory().get(0);
+        assertEquals("Обновленная задача", currentTask.getName(), "Сохраняется имя обновленной " +
+                "задачи");
 
-        assertEquals("Задача", historiTask.getName(), "Сохраняется имя исходной задачи");
-        assertEquals("Описание задачи", historiTask.getDescription(), "Сохраняется описание исходной задачи");
-        assertEquals(Status.NEW, historiTask.getStatus(), "Сохраняется исходный статус задачи");
+        List<Task> histori = taskManager.getHistory();
+        assertEquals(1, histori.size(), "В истории должна быть 1 запись");
+        assertEquals(updatedTask.getName(), histori.get(0).getName(), "После обновления задачи история " +
+                "содержит актуальную версию, а не оригинальную");
     }
 
     @Test
@@ -141,7 +137,8 @@ class InMemoryTaskManagerTest {
         Task savedTask = taskManager.getTaskById(originalTask.getId());
 
         assertEquals("Обновленная задача", updatedTask.getName(), "Название задачи изменилось");
-        assertEquals("Обновленное описание", updatedTask.getDescription(), "Описание задачи изменилось");
+        assertEquals("Обновленное описание", updatedTask.getDescription(), "Описание задачи " +
+                "изменилось");
         assertEquals(Status.DONE, updatedTask.getStatus(), "Статус задачи обновился");
     }
 
@@ -197,15 +194,18 @@ class InMemoryTaskManagerTest {
         Subtask subtask2 = new Subtask("Подзадача2", "Описание подзадачи2", Status.NEW, epic.getId());
         taskManager.createSubtask(subtask2);
 
-        subtask1.setStatus(Status.DONE);
-        taskManager.updateSubtask(subtask1);
+        Subtask savedSubtask1 = taskManager.getSubtaskById(subtask1.getId());
+        savedSubtask1.setStatus(Status.DONE);
+        taskManager.updateSubtask(savedSubtask1);
 
         Epic savedEpic = taskManager.getEpicById(epic.getId());
         assertEquals(Status.IN_PROGRESS, savedEpic.getStatus(), "Статус эпика IN_PROGRESS");
 
-        subtask2.setStatus(Status.DONE);
-        taskManager.updateSubtask(subtask2);
+        Subtask savedSubtask2 = taskManager.getSubtaskById(subtask2.getId());
+        savedSubtask2.setStatus(Status.DONE);
+        taskManager.updateSubtask(savedSubtask2);
 
+        savedEpic = taskManager.getEpicById(epic.getId());
         assertEquals(Status.DONE, savedEpic.getStatus(), "Статус эпика DONE");
     }
 
@@ -230,9 +230,47 @@ class InMemoryTaskManagerTest {
 
         ArrayList<Task> history = taskManager.getHistory();
 
-        assertEquals(2, history.size(), "В истории должно быть 2 записи");
-        assertEquals(savedTask, history.get(0), "Первая задача не совпадает");
-        assertEquals(savedTask, history.get(1), "Вторая задача не совпадает");
+        assertEquals(1, history.size(), "В истории должна быть 1 запись");
+        assertEquals(savedTask, history.get(0), "Задача в истории не совпадает с исходной");
+    }
+
+    @Test
+    void deleteAllSubtaskClearsEpicSubtaskListTest() { // удаление всех подзадач очищает список подзадач эпика
+        Epic epic = new Epic("Эпик", "Описание эпика");
+        taskManager.createEpic(epic);
+        Subtask subtask1 = new Subtask("Подзадача1", "Описание подзадачи1", Status.NEW, epic.getId());
+        taskManager.createSubtask(subtask1);
+        Subtask subtask2 = new Subtask("Подзадача2", "Описание подзадачи2", Status.NEW, epic.getId());
+        taskManager.createSubtask(subtask2);
+
+        taskManager.deleteAllSubtasks();
+        Epic savedEpic = taskManager.getEpicById(epic.getId());
+        assertTrue(savedEpic.getSubtaskIds().isEmpty(), "Все подзадачи эпика должны удалены");
+        assertEquals(Status.NEW, savedEpic.getStatus(), "Статус эпика после удаления всех подзадач - NEW");
+    }
+
+    @Test
+    void deleteEpicDeleteSubtaskTest() { // удаление эпика удаляет его подзадачи
+        Epic epic = new Epic("Эпик", "Описание эпика");
+        taskManager.createEpic(epic);
+        Subtask subtask = new Subtask("Подзадача", "Описание подзадачи", Status.NEW, epic.getId());
+        taskManager.createSubtask(subtask);
+
+        taskManager.deleteEpic(epic.getId());
+        assertTrue(taskManager.getAllSubtasks().isEmpty(), "Подзадачи удалены при удалении эпика");
+    }
+
+    @Test
+    void changingStatusSubtaskWithoutCallingUpdateSubtaskNotAffectEpicTest() { // изменение статуса подзадачи без вызова updateSubtask() не влияет на эпик
+        Epic epic = new Epic("Эпик", "Описание эпика");
+        taskManager.createEpic(epic);
+        Subtask subtask = new Subtask("Подзадача", "Описание подзадачи", Status.NEW, epic.getId());
+        taskManager.createSubtask(subtask);
+        Subtask savedSubtask = taskManager.getSubtaskById(subtask.getId());
+        savedSubtask.setStatus(Status.DONE);
+
+        Epic savedEpic = taskManager.getEpicById(epic.getId());
+        assertEquals(Status.NEW, savedEpic.getStatus(), "Статус эпика не изменился без вызова updateSubtask");
     }
 
 }
