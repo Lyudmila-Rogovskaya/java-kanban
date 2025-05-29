@@ -21,7 +21,6 @@ public class InMemoryHistoryManager implements HistoryManager {
     private final Map<Integer, Node> historyMap = new HashMap<>();
     private Node head;
     private Node tail;
-    private static final int MAX_HISTORY_SIZE = 10;
 
     @Override
     public void add(Task task) { // добавление истории

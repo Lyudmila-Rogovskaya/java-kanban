@@ -14,6 +14,7 @@ public class Epic extends Task {
         super(other);
         this.subtaskIds.addAll(other.subtaskIds);
         this.setId(other.getId());
+        this.setStatus(other.getStatus());
     }
 
     public ArrayList<Integer> getSubtaskIds() { // получить подзадачу
