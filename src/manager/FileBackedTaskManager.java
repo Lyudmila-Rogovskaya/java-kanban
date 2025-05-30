@@ -20,76 +20,16 @@ public class FileBackedTaskManager extends InMemoryTaskManager { // логика
         try (FileWriter writer = new FileWriter(file)) {
             writer.write("id,type,name,status,description,epic\n");
             for (Task task : getAllTasks()) {
-                writer.write(toString(task) + "\n");
+                writer.write(CSVTaskFormat.toString(task) + "\n");
             }
             for (Epic epic : getAllEpics()) {
-                writer.write(toString(epic) + "\n");
+                writer.write(CSVTaskFormat.toString(epic) + "\n");
             }
             for (Subtask subtask : getAllSubtasks()) {
-                writer.write(toString(subtask) + "\n");
+                writer.write(CSVTaskFormat.toString(subtask) + "\n");
             }
         } catch (IOException e) {
             throw new ManagerSaveException("Ошибка сохранения в файл: " + file.getName(), e);
-        }
-    }
-
-    protected String toString(Task task) { // преобразовать задачу в строку CSV
-        if (task instanceof Epic) {
-            return String.join(",",
-                    String.valueOf(task.getId()),
-                    "EPIC",
-                    task.getName(),
-                    task.getStatus().toString(),
-                    task.getDescription(),
-                    ""
-            );
-        } else if (task instanceof Subtask) {
-            Subtask subtask = (Subtask) task;
-            return String.join(",",
-                    String.valueOf(subtask.getId()),
-                    "SUBTASK",
-                    subtask.getName(),
-                    subtask.getStatus().toString(),
-                    subtask.getDescription(),
-                    String.valueOf(subtask.getEpicId())
-            );
-        } else {
-            return String.join(",",
-                    String.valueOf(task.getId()),
-                    "TASK",
-                    task.getName(),
-                    task.getStatus().toString(),
-                    task.getDescription(),
-                    ""
-            );
-        }
-    }
-
-    private static Task fromString(String value) { // создать задачи из строки
-        String[] fields = value.split(",");
-        int id = Integer.parseInt(fields[0]);
-        TaskType type = TaskType.valueOf(fields[1]);
-        String name = fields[2];
-        Status status = Status.valueOf(fields[3]);
-        String description = fields[4];
-
-        switch (type) {
-            case TASK:
-                Task task = new Task(name, description, status);
-                task.setId(id);
-                return task;
-            case EPIC:
-                Epic epic = new Epic(name, description);
-                epic.setId(id);
-                epic.setStatus(status);
-                return epic;
-            case SUBTASK:
-                int epicId = Integer.parseInt(fields[5]);
-                Subtask subtask = new Subtask(name, description, status, epicId);
-                subtask.setId(id);
-                return subtask;
-            default:
-                throw new IllegalArgumentException("Неизвестный тип задачи: " + type);
         }
     }
 
@@ -105,14 +45,19 @@ public class FileBackedTaskManager extends InMemoryTaskManager { // логика
                 String line = lines[i].trim();
                 if (line.isEmpty()) continue;
 
-                Task task = fromString(line);
-                if (task instanceof Epic) {
-                    manager.epics.put(task.getId(), (Epic) task);
-                } else if (task instanceof Subtask) {
-                    manager.subtasks.put(task.getId(), (Subtask) task);
-                } else {
-                    manager.tasks.put(task.getId(), task);
+                Task task = CSVTaskFormat.fromString(line);
+                switch (task.getType()) {
+                    case TASK:
+                        manager.tasks.put(task.getId(), task);
+                        break;
+                    case EPIC:
+                        manager.epics.put(task.getId(), (Epic) task);
+                        break;
+                    case SUBTASK:
+                        manager.subtasks.put(task.getId(), (Subtask) task);
+                        break;
                 }
+
                 if (task.getId() >= manager.nextId) {
                     manager.nextId = task.getId() + 1;
                 }
@@ -123,10 +68,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager { // логика
                 if (epic != null) {
                     epic.addSubtaskId(subtask.getId());
                 }
-            }
-
-            for (Epic epic : manager.epics.values()) {
-                manager.updateEpicStatus(epic);
             }
 
         } catch (IOException e) {

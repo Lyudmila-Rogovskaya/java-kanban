@@ -68,4 +68,8 @@ public class Task {
         return Objects.hash(id);
     }
 
+    public TaskType getType() {
+        return TaskType.TASK;
+    }
+
 }

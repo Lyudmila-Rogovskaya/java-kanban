@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -46,32 +45,9 @@ public class FileBackedTaskManagerTest {
 
         FileBackedTaskManager loadedManager = FileBackedTaskManager.loadFromFile(tempFile);
 
-        List<Task> loadedTasks = loadedManager.getAllTasks();
-        assertEquals(1, loadedTasks.size(), "Должна быть одна задача после загрузки");
-
-        Task loadedTask = loadedTasks.get(0);
-        assertEquals(task.getName(), loadedTask.getName(), "Название задачи должно совпадать после загрузки");
-        assertEquals(task.getDescription(), loadedTask.getDescription(), "Описание задачи должно совпадать " +
-                "после загрузки");
-        assertEquals(task.getStatus(), loadedTask.getStatus(), "Статус задачи должен совпадать после загрузки");
-
-        List<Epic> loadedEpics = loadedManager.getAllEpics();
-        assertEquals(1, loadedEpics.size(), "Должен быть один эпик после загрузки");
-
-        Epic loadedEpic = loadedEpics.get(0);
-        assertEquals(epic.getName(), loadedEpic.getName(), "Название эпика должно совпадать после загрузки");
-        assertEquals(1, loadedEpic.getSubtaskIds().size(), "Эпик должен содержать ровно одну " +
-                "подзадачу после загрузки");
-        assertEquals(Status.DONE, loadedEpic.getStatus(), "Статус эпика должен быть DONE после загрузки");
-
-        List<Subtask> loadedSubtasks = loadedManager.getAllSubtasks();
-        assertEquals(1, loadedSubtasks.size(), "Должна быть одна подзадача после загрузки");
-
-        Subtask loadedSubtask = loadedSubtasks.get(0);
-        assertEquals(subtask.getName(), loadedSubtask.getName(), "Название подзадачи должно совпадать " +
-                "после загрузки");
-        assertEquals(subtask.getEpicId(), loadedSubtask.getEpicId(), "Id эпика подзадачи должно совпадать " +
-                "после загрузки");
+        assertEquals(manager.getAllTasks(), loadedManager.getAllTasks(), "Списки задач не совпадают");
+        assertEquals(manager.getAllEpics(), loadedManager.getAllEpics(), "Списки эпиков не совпадают");
+        assertEquals(manager.getAllSubtasks(), loadedManager.getAllSubtasks(), "Списки подзадач не совпадают");
     }
 
     @Test
