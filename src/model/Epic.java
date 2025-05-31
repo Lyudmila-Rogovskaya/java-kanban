@@ -14,6 +14,7 @@ public class Epic extends Task {
         super(other);
         this.subtaskIds.addAll(other.subtaskIds);
         this.setId(other.getId());
+        this.setStatus(other.getStatus());
     }
 
     public ArrayList<Integer> getSubtaskIds() { // получить подзадачу
@@ -26,6 +27,11 @@ public class Epic extends Task {
 
     public void removeSubtaskId(Integer id) { // удалить ид подзадачи
         subtaskIds.remove(id);
+    }
+
+    @Override
+    public TaskType getType() {
+        return TaskType.EPIC;
     }
 
 }
