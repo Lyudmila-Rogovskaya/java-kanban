@@ -1,5 +1,7 @@
 package model;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class Task {
@@ -8,18 +10,28 @@ public class Task {
     private String description; // описание задачи
     private Status status;
     private int id;
+    protected Duration duration;
+    protected LocalDateTime startTime;
 
-    public Task(String name, String description, Status status) { // конструктор
+    public Task(String name, String description, Status status, LocalDateTime startTime, Duration duration) { // конструктор
         this.name = name;
         this.description = description;
         this.status = status;
+        this.startTime = startTime;
+        this.duration = duration;
     }
 
-    public Task(Task other) {
+    public Task(String name, String description, Status status) { // конструктор
+        this(name, description, status, null, Duration.ZERO);
+    }
+
+    public Task(Task other) { // конструктор
         this.name = other.name;
         this.description = other.description;
         this.status = other.status;
         this.id = other.id;
+        this.startTime = other.startTime;
+        this.duration = other.duration;
     }
 
     public String getName() {
@@ -36,6 +48,18 @@ public class Task {
 
     public int getId() {
         return id;
+    }
+
+    public LocalDateTime getEndTime() {
+        return startTime != null ? startTime.plus(duration) : null;
+    }
+
+    public LocalDateTime getStartTime() {
+        return startTime;
+    }
+
+    public Duration getDuration() {
+        return duration;
     }
 
     public void setName(String name) {
