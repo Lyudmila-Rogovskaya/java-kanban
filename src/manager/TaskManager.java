@@ -5,6 +5,7 @@ import model.Subtask;
 import model.Task;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public interface TaskManager {
 
@@ -50,5 +51,7 @@ public interface TaskManager {
     ArrayList<Subtask> getEpicSubtasks(int epicId); // получить эпик к подзадаче
 
     ArrayList<Task> getHistory(); // получить историю
+
+    List<Task> getPrioritizedTasks(); // сортировка всех задач по приоритету
 
 }

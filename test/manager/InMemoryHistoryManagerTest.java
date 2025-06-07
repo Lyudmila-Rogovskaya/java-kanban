@@ -118,4 +118,19 @@ class InMemoryHistoryManagerTest {
                 "возвращается список без ошибок");
     }
 
+    @Test
+    void shouldHandleEmptyHistoryTest() { // для всех методов интерфейса - граничные условия - пустая история задач
+        List<Task> history = historyManager.getHistory();
+        assertTrue(history.isEmpty(), "История должна быть пустой");
+    }
+
+    @Test
+    void shouldHandleDuplicatesTest() { // для всех методов интерфейса - граничные условия - дублирование
+        historyManager.add(task1);
+        historyManager.add(task1);
+        historyManager.add(task1);
+
+        assertEquals(1, historyManager.getHistory().size(), "Дубликаты не должны создаваться");
+    }
+
 }
