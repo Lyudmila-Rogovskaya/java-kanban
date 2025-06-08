@@ -78,6 +78,14 @@ public class Task {
         this.id = id;
     }
 
+    public void setStartTime(LocalDateTime startTime) {
+        this.startTime = startTime;
+    }
+
+    public void setDuration(Duration duration) {
+        this.duration = duration;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true; // проверяем адреса объектов

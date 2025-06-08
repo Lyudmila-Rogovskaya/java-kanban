@@ -4,7 +4,6 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public class Epic extends Task {
 
@@ -13,12 +12,6 @@ public class Epic extends Task {
 
     public Epic(String name, String description) { // конструктор
         super(name, description, Status.NEW, null, Duration.ZERO);
-    }
-
-    public Epic(Epic other) {
-        super(other);
-        this.subtaskIds.addAll(other.subtaskIds);
-        this.endTime = other.endTime;
     }
 
     public ArrayList<Integer> getSubtaskIds() { // получить подзадачу
@@ -46,34 +39,35 @@ public class Epic extends Task {
             return;
         }
 
-        this.duration = subtasks.stream()
-                .map(subtask -> subtask.getDuration() != null ? subtask.getDuration() : Duration.ZERO)
-                .reduce(Duration.ZERO, Duration::plus);
+        LocalDateTime minStart = LocalDateTime.MAX;
+        LocalDateTime maxEnd = LocalDateTime.MIN;
+        Duration totalDuration = Duration.ZERO;
 
-        this.startTime = subtasks.stream()
-                .map(Subtask::getStartTime)
-                .filter(Objects::nonNull)
-                .min(LocalDateTime::compareTo)
-                .orElse(null);
+        for (Subtask subtask : subtasks) {
+            Duration duration = subtask.getDuration() != null ? subtask.getDuration() : Duration.ZERO;
+            totalDuration = totalDuration.plus(duration);
 
-        this.endTime = subtasks.stream()
-                .map(Subtask::getEndTime)
-                .filter(Objects::nonNull)
-                .max(LocalDateTime::compareTo)
-                .orElse(null);
+            if (subtask.getStartTime() != null) {
+                if (subtask.getStartTime().isBefore(minStart)) {
+                    minStart = subtask.getStartTime();
+                }
+
+                LocalDateTime endTime = subtask.getEndTime();
+                if (endTime != null && endTime.isAfter(maxEnd)) {
+                    maxEnd = endTime;
+                }
+            }
+        }
+
+        this.startTime = minStart.equals(LocalDateTime.MAX) ? null : minStart;
+        this.endTime = maxEnd.equals(LocalDateTime.MIN) ? null : maxEnd;
+        this.duration = totalDuration;
+
     }
 
     @Override
     public LocalDateTime getEndTime() {
         return endTime;
-    }
-
-    public void setStartTime(LocalDateTime startTime) {
-        this.startTime = startTime;
-    }
-
-    public void setDuration(Duration duration) {
-        this.duration = duration;
     }
 
     public void setEndTime(LocalDateTime endTime) {

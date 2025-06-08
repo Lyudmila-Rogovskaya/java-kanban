@@ -74,19 +74,15 @@ public class FileBackedTaskManager extends InMemoryTaskManager { // логика
                 }
             }
 
-            for (Task task : manager.tasks.values()) {
-                if (task.getStartTime() != null) {
-                    manager.prioritizedTasks.add(task);
-                }
+            for (Task task : manager.getAllTasks()) {
+                manager.prioritizedTasks.add(task);
             }
 
-            for (Subtask subtask : manager.subtasks.values()) {
-                if (subtask.getStartTime() != null) {
-                    manager.prioritizedTasks.add(subtask);
-                }
+            for (Subtask subtask : manager.getAllSubtasks()) {
+                manager.prioritizedTasks.add(subtask);
             }
 
-            for (Epic epic : manager.epics.values()) {
+            for (Epic epic : manager.getAllEpics()) {
                 List<Subtask> subtasks = manager.getEpicSubtasks(epic.getId());
                 epic.updateTime(subtasks);
             }
@@ -221,98 +217,8 @@ public class FileBackedTaskManager extends InMemoryTaskManager { // логика
         manager.createEpic(epic02);
 
         manager.save();
-        FileBackedTaskManager loadedManager = FileBackedTaskManager.loadFromFile(file);
 
-        if (compareManagers(manager, loadedManager)) {
-            System.out.println("\nДанные менеджеров идентичны");
-        } else {
-            System.out.println("\nДанные менеджеров различаются");
-        }
-    }
-
-    private static boolean compareManagers(TaskManager manager1, TaskManager manager2) { // сравнения менеджеров
-
-        // сравнение задач
-        List<Task> tasks1 = manager1.getAllTasks();
-        List<Task> tasks2 = manager2.getAllTasks();
-
-        if (tasks1.size() != tasks2.size()) {
-            return false;
-        }
-
-        for (Task task1 : tasks1) {
-            Task task2 = findTaskById(tasks2, task1.getId());
-            if (task2 == null || !task1.getName().equals(task2.getName()) ||
-                    !task1.getDescription().equals(task2.getDescription()) ||
-                    task1.getStatus() != task2.getStatus()) {
-                return false;
-            }
-        }
-
-        // сравнение эпиков
-        List<Epic> epics1 = manager1.getAllEpics();
-        List<Epic> epics2 = manager2.getAllEpics();
-
-        if (epics1.size() != epics2.size()) {
-            return false;
-        }
-
-        for (Epic epic1 : epics1) {
-            Epic epic2 = findEpicById(epics2, epic1.getId());
-            if (epic2 == null || !epic1.getName().equals(epic2.getName()) ||
-                    !epic1.getDescription().equals(epic2.getDescription()) ||
-                    epic1.getStatus() != epic2.getStatus() ||
-                    !epic1.getSubtaskIds().equals(epic2.getSubtaskIds())) {
-                return false;
-            }
-        }
-
-        // сравнение подзадач
-        List<Subtask> subtasks1 = manager1.getAllSubtasks();
-        List<Subtask> subtasks2 = manager2.getAllSubtasks();
-
-        if (subtasks1.size() != subtasks2.size()) {
-            return false;
-        }
-
-        for (Subtask subtask1 : subtasks1) {
-            Subtask subtask2 = findSubtaskById(subtasks2, subtask1.getId());
-            if (subtask2 == null || !subtask1.getName().equals(subtask2.getName()) ||
-                    !subtask1.getDescription().equals(subtask2.getDescription()) ||
-                    subtask1.getStatus() != subtask2.getStatus() ||
-                    subtask1.getEpicId() != subtask2.getEpicId()) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    private static Task findTaskById(List<Task> tasks, int id) { // поиск задачи по id
-        for (Task task : tasks) {
-            if (task.getId() == id) {
-                return task;
-            }
-        }
-        return null;
-    }
-
-    private static Epic findEpicById(List<Epic> epics, int id) { // поиск эпика по id
-        for (Epic epic : epics) {
-            if (epic.getId() == id) {
-                return epic;
-            }
-        }
-        return null;
-    }
-
-    private static Subtask findSubtaskById(List<Subtask> subtasks, int id) { // поиск подзадачи по id
-        for (Subtask subtask : subtasks) {
-            if (subtask.getId() == id) {
-                return subtask;
-            }
-        }
-        return null;
+        System.out.println("\nДанные загружены из файла");
     }
 
 }

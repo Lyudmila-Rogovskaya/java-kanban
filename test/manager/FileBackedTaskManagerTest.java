@@ -29,8 +29,7 @@ public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskMan
 
     @Test
     void saveAndLoadEmptyFileTest() { // сохранение и загрузка пустого файла
-        FileBackedTaskManager manager = createTaskManager();
-        manager.save();
+        taskManager.save();
         FileBackedTaskManager loadedManager = FileBackedTaskManager.loadFromFile(tempFile);
 
         assertTrue(loadedManager.getAllTasks().isEmpty(), "Список задач должен быть пустой");
@@ -40,33 +39,34 @@ public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskMan
 
     @Test
     void saveAndLoadMultipleTaskTest() { // сохранение и загрузка нескольких задач
-        FileBackedTaskManager manager = createTaskManager();
         Task task = new Task("Задача", "Описание задачи", Status.IN_PROGRESS);
-        manager.createTask(task);
+        taskManager.createTask(task);
         Epic epic = new Epic("Эпик", "Описание эпика");
-        manager.createEpic(epic);
+        taskManager.createEpic(epic);
         Subtask subtask = new Subtask("Подзадача", "Описание подзадачи", Status.DONE, epic.getId());
-        manager.createSubtask(subtask);
+        taskManager.createSubtask(subtask);
 
         FileBackedTaskManager loadedManager = FileBackedTaskManager.loadFromFile(tempFile);
 
-        assertEquals(manager.getAllTasks(), loadedManager.getAllTasks(), "Списки задач не совпадают");
-        assertEquals(manager.getAllEpics(), loadedManager.getAllEpics(), "Списки эпиков не совпадают");
-        assertEquals(manager.getAllSubtasks(), loadedManager.getAllSubtasks(), "Списки подзадач не совпадают");
+        assertEquals(taskManager.getAllTasks(), loadedManager.getAllTasks(),
+                "Списки задач не совпадают");
+        assertEquals(taskManager.getAllEpics(), loadedManager.getAllEpics(),
+                "Списки эпиков не совпадают");
+        assertEquals(taskManager.getAllSubtasks(), loadedManager.getAllSubtasks(),
+                "Списки подзадач не совпадают");
     }
 
     @Test
     void epicStatusUpdateSubtaskTest() { // статус эпика после добавления подзадачи
-        FileBackedTaskManager manager = createTaskManager();
         Epic epic = new Epic("Эпик", "Описание эпика");
-        manager.createEpic(epic);
+        taskManager.createEpic(epic);
 
         assertEquals(Status.NEW, epic.getStatus(), "Начальный статус эпика");
 
         Subtask subtask = new Subtask("Подзадача", "Описание", Status.DONE, epic.getId());
-        manager.createSubtask(subtask);
+        taskManager.createSubtask(subtask);
 
-        Epic updatedEpic = manager.getEpicById(epic.getId());
+        Epic updatedEpic = taskManager.getEpicById(epic.getId());
         assertEquals(Status.DONE, updatedEpic.getStatus(), "Статус эпика после добавления DONE подзадачи");
     }
 
@@ -76,13 +76,14 @@ public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskMan
         FileBackedTaskManager manager = new FileBackedTaskManager(invalidFile);
         Task task = new Task("Task", "Description", Status.NEW);
 
-        assertThrows(ManagerSaveException.class, () -> manager.createTask(task), "Должно быть исключение при сохранении");
+        assertThrows(ManagerSaveException.class, () -> manager.createTask(task),
+                "Должно быть исключение при сохранении");
     }
 
     @Test
     void throwWhenLoadingFileTest() { // исключения при загрузке файла
-        createTaskManager();
-        assertDoesNotThrow(() -> FileBackedTaskManager.loadFromFile(tempFile), "Не должно быть исключения при загрузке");
+        assertDoesNotThrow(() -> FileBackedTaskManager.loadFromFile(tempFile),
+                "Не должно быть исключения при загрузке");
     }
 
 }
