@@ -45,20 +45,22 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void updateTask(Task task) { // обновить задачу
         Task oldTask = tasks.get(task.getId());
-        if (oldTask != null) {
-            if (oldTask.getStartTime() != null) {
-                prioritizedTasks.remove(oldTask);
-            }
+        if (oldTask == null) {
+            return;
+        }
 
-            if (hasIntersections(task)) {
-                prioritizedTasks.add(oldTask);
-                throw new TimeConflictException("Обновление задачи приводит к пересечению по времени");
-            }
+        if (hasIntersections(task)) {
+            throw new TimeConflictException("Обновление задачи приводит к пересечению по времени");
+        }
 
-            tasks.put(task.getId(), task);
-            if (task.getStartTime() != null) {
-                prioritizedTasks.add(task);
-            }
+        if (oldTask.getStartTime() != null) {
+            prioritizedTasks.remove(oldTask);
+        }
+
+        tasks.put(task.getId(), task);
+
+        if (task.getStartTime() != null) {
+            prioritizedTasks.add(task);
         }
     }
 
@@ -188,26 +190,28 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void updateSubtask(Subtask subtask) { // обновить подзадачу
         Subtask oldSubtask = subtasks.get(subtask.getId());
-        if (oldSubtask != null) {
-            if (oldSubtask.getStartTime() != null) {
-                prioritizedTasks.remove(oldSubtask);
-            }
+        if (oldSubtask == null) {
+            return;
+        }
 
-            if (hasIntersections(subtask)) {
-                if (oldSubtask.getStartTime() != null) {
-                    prioritizedTasks.add(oldSubtask);
-                }
-                throw new TimeConflictException("Обновление подзадачи приводит к пересечению по времени");
-            }
+        if (hasIntersections(subtask)) {
+            throw new TimeConflictException("Обновление подзадачи приводит к пересечению по времени");
+        }
 
-            subtasks.put(subtask.getId(), subtask);
+        if (oldSubtask.getStartTime() != null) {
+            prioritizedTasks.remove(oldSubtask);
+        }
+
+        subtasks.put(subtask.getId(), subtask);
+
+        if (subtask.getStartTime() != null) {
             prioritizedTasks.add(subtask);
+        }
 
-            Epic epic = epics.get(subtask.getEpicId());
-            if (epic != null) {
-                updateEpicStatus(epic);
-                updateEpicTime(epic);
-            }
+        Epic epic = epics.get(subtask.getEpicId());
+        if (epic != null) {
+            updateEpicStatus(epic);
+            updateEpicTime(epic);
         }
     }
 

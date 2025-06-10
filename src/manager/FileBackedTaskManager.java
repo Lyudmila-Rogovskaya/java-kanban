@@ -53,12 +53,14 @@ public class FileBackedTaskManager extends InMemoryTaskManager { // логика
                 switch (task.getType()) {
                     case TASK:
                         manager.tasks.put(task.getId(), task);
+                        manager.prioritizedTasks.add(task);
                         break;
                     case EPIC:
                         manager.epics.put(task.getId(), (Epic) task);
                         break;
                     case SUBTASK:
                         manager.subtasks.put(task.getId(), (Subtask) task);
+                        manager.prioritizedTasks.add(task);
                         break;
                 }
 
@@ -72,14 +74,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager { // логика
                 if (epic != null) {
                     epic.addSubtaskId(subtask.getId());
                 }
-            }
-
-            for (Task task : manager.getAllTasks()) {
-                manager.prioritizedTasks.add(task);
-            }
-
-            for (Subtask subtask : manager.getAllSubtasks()) {
-                manager.prioritizedTasks.add(subtask);
             }
 
             for (Epic epic : manager.getAllEpics()) {

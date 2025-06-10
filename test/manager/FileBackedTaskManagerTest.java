@@ -29,7 +29,6 @@ public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskMan
 
     @Test
     void saveAndLoadEmptyFileTest() { // сохранение и загрузка пустого файла
-        taskManager.save();
         FileBackedTaskManager loadedManager = FileBackedTaskManager.loadFromFile(tempFile);
 
         assertTrue(loadedManager.getAllTasks().isEmpty(), "Список задач должен быть пустой");
