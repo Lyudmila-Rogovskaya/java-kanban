@@ -1,11 +1,15 @@
 package manager;
 
-import model.*;
+import model.Epic;
+import model.Status;
+import model.Subtask;
+import model.Task;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.List;
 
 public class FileBackedTaskManager extends InMemoryTaskManager { // логика сохранения в файл
 
@@ -18,7 +22,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager { // логика
 
     protected void save() { // сохранить текущее состояние всех задач, подзадач и эпиков в CSV
         try (FileWriter writer = new FileWriter(file)) {
-            writer.write("id,type,name,status,description,epic\n");
+            writer.write("id,type,name,status,description,startTime,duration,epic\n");
             for (Task task : getAllTasks()) {
                 writer.write(CSVTaskFormat.toString(task) + "\n");
             }
@@ -49,12 +53,14 @@ public class FileBackedTaskManager extends InMemoryTaskManager { // логика
                 switch (task.getType()) {
                     case TASK:
                         manager.tasks.put(task.getId(), task);
+                        manager.prioritizedTasks.add(task);
                         break;
                     case EPIC:
                         manager.epics.put(task.getId(), (Epic) task);
                         break;
                     case SUBTASK:
                         manager.subtasks.put(task.getId(), (Subtask) task);
+                        manager.prioritizedTasks.add(task);
                         break;
                 }
 
@@ -68,6 +74,11 @@ public class FileBackedTaskManager extends InMemoryTaskManager { // логика
                 if (epic != null) {
                     epic.addSubtaskId(subtask.getId());
                 }
+            }
+
+            for (Epic epic : manager.getAllEpics()) {
+                List<Subtask> subtasks = manager.getEpicSubtasks(epic.getId());
+                epic.updateTime(subtasks);
             }
 
         } catch (IOException e) {
@@ -175,6 +186,33 @@ public class FileBackedTaskManager extends InMemoryTaskManager { // логика
         if (!isLoading) {
             save();
         }
+    }
+
+    public static void main(String[] args) {
+        System.out.println("Поехали!");
+        System.out.println("\n=== Дополнительное задание к ТЗ-7. Реализуем пользовательский сценарий ===");
+
+        File file = new File("tasks.csv");
+        FileBackedTaskManager manager = new FileBackedTaskManager(file);
+
+        Task task01 = new Task("Задача01", "Описание задачи01", Status.NEW);
+        manager.createTask(task01);
+        Task task02 = new Task("Задача02", "Описание задачи02", Status.NEW);
+        manager.createTask(task02);
+        Epic epic01 = new Epic("Эпик01", "Описание эпика01");
+        manager.createEpic(epic01);
+        Subtask subtask01 = new Subtask("Подзадача01", "Описание подзадачи01", Status.NEW, epic01.getId());
+        manager.createSubtask(subtask01);
+        Subtask subtask02 = new Subtask("Подзадача02", "Описание подзадачи02", Status.NEW, epic01.getId());
+        manager.createSubtask(subtask02);
+        Subtask subtask03 = new Subtask("Подзадача03", "Описание подзадачи03", Status.NEW, epic01.getId());
+        manager.createSubtask(subtask03);
+        Epic epic02 = new Epic("Эпик02", "Описание эпика02");
+        manager.createEpic(epic02);
+
+        manager.save();
+
+        System.out.println("\nДанные загружены из файла");
     }
 
 }
