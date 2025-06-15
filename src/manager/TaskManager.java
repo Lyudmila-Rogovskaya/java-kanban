@@ -16,7 +16,7 @@ public interface TaskManager {
 
     ArrayList<Task> getAllTasks(); // получить все задачи
 
-    Task getTaskById(int id); // получить задачу по id
+    Task getTaskById(int id) throws NotFoundException; // получить задачу по id
 
     void deleteTask(int id); // удалить задачу
 
@@ -29,7 +29,7 @@ public interface TaskManager {
 
     ArrayList<Epic> getAllEpics(); // получить все эпики
 
-    Epic getEpicById(int id); // получить эпик по id
+    Epic getEpicById(int id) throws NotFoundException; // получить эпик по id
 
     void deleteEpic(int id); // удалить эпик
 
@@ -42,7 +42,7 @@ public interface TaskManager {
 
     ArrayList<Subtask> getAllSubtasks(); // получить все подзадачи
 
-    Subtask getSubtaskById(int id); // получить подзадачу по id
+    Subtask getSubtaskById(int id) throws NotFoundException; // получить подзадачу по id
 
     void deleteSubtask(Integer id); // удалить подзадачу
 
