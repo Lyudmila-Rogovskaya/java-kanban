@@ -48,11 +48,10 @@ public class EpicsHandler extends BaseTaskHandler {
                 sendText(exchange, gson.toJson(taskManager.getAllEpics()), 200);
             } else if (path.matches("/epics/\\d+/subtasks")) {
                 int epicId = extractId(path.replace("/subtasks", ""));
-                Epic epic = taskManager.getEpicById(epicId);
-                if (epic == null) {
-                    sendNotFound(exchange, "Эпик не найден");
+                List<Subtask> subtasks = taskManager.getEpicSubtasks(epicId);
+                if (subtasks == null || subtasks.isEmpty()) {
+                    sendNotFound(exchange, "Эпик не найден или нет подзадач");
                 } else {
-                    List<Subtask> subtasks = taskManager.getEpicSubtasks(epicId);
                     sendText(exchange, gson.toJson(subtasks), 200);
                 }
             } else if (path.matches("/epics/\\d+")) {
@@ -70,7 +69,6 @@ public class EpicsHandler extends BaseTaskHandler {
             sendNotFound(exchange, e.getMessage());
         }
     }
-
 
     private void handlePost(HttpExchange exchange) throws IOException, NotFoundException { // создаем/обновляем эпик
         Epic epic = gson.fromJson(readRequestBody(exchange), Epic.class);

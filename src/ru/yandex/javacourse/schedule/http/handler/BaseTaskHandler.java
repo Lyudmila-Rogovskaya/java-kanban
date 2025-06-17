@@ -2,14 +2,13 @@ package ru.yandex.javacourse.schedule.http.handler;
 
 import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
 import manager.TaskManager;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
-public abstract class BaseTaskHandler extends BaseHttpHandler implements HttpHandler {
+public abstract class BaseTaskHandler extends BaseHttpHandler {
     protected final TaskManager taskManager;
     protected final Gson gson;
 
@@ -28,7 +27,5 @@ public abstract class BaseTaskHandler extends BaseHttpHandler implements HttpHan
             return new String(input.readAllBytes(), StandardCharsets.UTF_8);
         }
     }
-
-    public abstract void handle(HttpExchange exchange) throws IOException;
 
 }

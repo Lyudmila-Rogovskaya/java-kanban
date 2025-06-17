@@ -1,11 +1,12 @@
 package ru.yandex.javacourse.schedule.http.handler;
 
 import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpHandler;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-public class BaseHttpHandler { // отправляем JSON-текст с указанным статусом
+public abstract class BaseHttpHandler implements HttpHandler { // отправляем JSON-текст с указанным статусом
     protected void sendText(HttpExchange exchange, String text, int statusCode) throws IOException {
         byte[] resp = text.getBytes(StandardCharsets.UTF_8);
         exchange.getResponseHeaders().add("Content-Type", "application/json;charset=utf-8");

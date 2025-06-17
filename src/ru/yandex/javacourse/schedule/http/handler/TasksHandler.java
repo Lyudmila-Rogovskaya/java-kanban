@@ -39,7 +39,7 @@ public class TasksHandler extends BaseTaskHandler {
         }
     }
 
-    private void handleGet(HttpExchange exchange) throws IOException, NotFoundException { // возвращаем задачи/задачу по ID
+    private void handleGet(HttpExchange exchange) throws IOException { // возвращаем задачи/задачу по ID
         String path = exchange.getRequestURI().getPath();
         if (path.equals("/tasks")) {
             sendText(exchange, gson.toJson(taskManager.getAllTasks()), 200);
@@ -53,7 +53,7 @@ public class TasksHandler extends BaseTaskHandler {
         }
     }
 
-    private void handlePost(HttpExchange exchange) throws IOException, TimeConflictException { // создаем/обновляем задачу
+    private void handlePost(HttpExchange exchange) throws IOException { // создаем/обновляем задачу
         Task task = gson.fromJson(readRequestBody(exchange), Task.class);
         if (task.getId() == 0) {
             taskManager.createTask(task);

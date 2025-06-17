@@ -61,7 +61,10 @@ public class SubtasksHandler extends BaseTaskHandler {
                 return;
             }
 
-            if (taskManager.getEpicById(subtask.getEpicId()) == null) {
+            boolean epicExists = taskManager.getAllEpics().stream()
+                    .anyMatch(epic -> epic.getId() == subtask.getEpicId());
+
+            if (!epicExists) {
                 sendNotFound(exchange, "Эпик не найден");
                 return;
             }
